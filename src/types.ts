@@ -10,6 +10,19 @@ export enum Tile {
   Door,
 }
 
+type Middleware<Input, Output = Input> = (
+  value: Input,
+  next: (value: Input) => Output,
+) => Output;
+
+export function pipe<T>(...pipes: Middleware<T>[]): (value: T) => T {
+  return [...pipes].reverse().reduce(
+    (next: (value: T) => T, middleware: Middleware<T>) => (value: T) =>
+      middleware(value, next),
+    (value: T) => value,
+  );
+}
+
 export class Vector2 {
   public static Zero = new Vector2(0, 0);
   public static Up = new Vector2(0, -1);

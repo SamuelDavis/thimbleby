@@ -2,7 +2,7 @@ import { Display, Map, RNG } from "rot-js";
 import { Room } from "rot-js/lib/map/features";
 import { createEffect, JSX, onCleanup, onMount } from "solid-js";
 import type Model from "./Model";
-import { messages } from "./Message";
+import { Message, messages } from "./Message";
 import { Color, Tile, Vector2 } from "./types";
 import State from "./State";
 
