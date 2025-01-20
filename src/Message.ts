@@ -1,10 +1,12 @@
-import type { Tile, Vector2 } from "./types";
+import type { Tile, Vector2, VisionRange } from "./types";
 
 interface Messages {
   noop: void;
   setMap: Tile[][];
   setPlayerPosition: Vector2;
   move: Vector2;
+  updatePlayerVision: void;
+  setPlayerVisionRange: VisionRange;
 }
 
 export type Message = {

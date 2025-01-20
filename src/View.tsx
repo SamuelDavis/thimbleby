@@ -1,14 +1,23 @@
 import { Display, Map, RNG } from "rot-js";
 import { Room } from "rot-js/lib/map/features";
-import { createEffect, onCleanup, onMount } from "solid-js";
+import { createEffect, JSX, onCleanup, onMount } from "solid-js";
 import type Model from "./Model";
 import { messages } from "./Message";
-import { Tile, Vector2 } from "./types";
+import { Color, Tile, Vector2 } from "./types";
 import State from "./State";
+
+const TileToGlyphMap: Record<Tile, string> = {
+  [Tile.Floor]: ".",
+  [Tile.Wall]: "#",
+  [Tile.Door]: "n",
+};
 
 export default function View() {
   RNG.setSeed(Math.random());
-  const display = new Display({ fg: "black", bg: "lightgray" });
+  const display = new Display({
+    fg: Color.Black.toString(),
+    bg: Color.Black.toString(),
+  });
   const { width, height } = display.getOptions();
 
   const digger = new Map.Digger(width, height);
@@ -40,8 +49,28 @@ export default function View() {
     window.removeEventListener("keypress", onKeypress);
   });
 
+  function onInputVisionRange(event: {
+    currentTarget: HTMLInputElement;
+  }): void {
+    State.dispatch(
+      messages.setPlayerVisionRange(event.currentTarget.valueAsNumber),
+    );
+  }
+
   return (
     <main>
+      <header>
+        <label>
+          <span>Vision Range</span>
+          <input
+            type="range"
+            min="1"
+            max="10"
+            value={State.model.visionRange}
+            onInput={onInputVisionRange}
+          />
+        </label>
+      </header>
       <article>{display.getContainer()}</article>
     </main>
   );
@@ -49,15 +78,26 @@ export default function View() {
 
 function render(display: Display, model: Model) {
   display.clear();
-  model.map.forEach((row, y) => {
-    return row.forEach((v, x) => {
-      let bg = null;
-      if (v === Tile.Floor) bg = "black";
-      else if (v === Tile.Door) bg = "red";
-      display.draw(x, y, " ", null, bg);
-    });
+  model.vision.forEach((vision) => {
+    const { p, v } = vision;
+    const { x, y } = p;
+    const t = model.map[y]?.[x];
+
+    const foreground = Color.White.setAlpha(v);
+    let background = Color.Black.setAlpha(v);
+    if (t === Tile.Wall) background = background.setOpaque();
+
+    const glyph = TileToGlyphMap[t];
+
+    display.draw(x, y, glyph, foreground.toString(), background.toString());
   });
-  display.drawOver(model.player.x, model.player.y, "@", "white", null);
+  display.drawOver(
+    model.player.x,
+    model.player.y,
+    "@",
+    Color.White.toString(),
+    null,
+  );
 }
 
 function onKeypress(event: KeyboardEvent): void {

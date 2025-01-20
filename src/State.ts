@@ -9,18 +9,42 @@ const State = createRoot(() => {
   const [model, setModel] = createStore<Model>({
     map: [],
     player: Vector2.Zero,
+    vision: [],
+    visionRange: 10,
   });
+
   function resolve(model: Model, message: Message): Message {
-    if (message.type === messages.move.type) {
-      const next = model.player.add(message.payload);
-      const tile = model.map[next.y]?.[next.x];
-      if (tile === Tile.Wall) return messages.noop();
+    switch (message.type) {
+      case messages.move.type: {
+        const next = model.player.add(message.payload);
+        const tile = model.map[next.y]?.[next.x];
+        return tile === Tile.Wall
+          ? messages.noop()
+          : messages.setPlayerPosition(next);
+      }
     }
     return message;
   }
+
+  function effects(_model: Model, message: Message): void {
+    switch (message.type) {
+      case messages.setPlayerVisionRange.type:
+      case messages.setPlayerPosition.type: {
+        dispatch(messages.updatePlayerVision());
+        break;
+      }
+    }
+  }
+
   function dispatch(message: Message) {
     message = resolve(model, message);
-    setModel(produce((model) => Update(model, message)));
+    setModel(
+      produce((model) => {
+        model = Update(model, message);
+        effects(model, message);
+        return model;
+      }),
+    );
   }
 
   return { dispatch, model };

@@ -1,8 +1,10 @@
-import type { Tile, Vector2 } from "./types";
+import type { VisionRange, Tile, Vector2, Vision } from "./types";
 
 type Model = {
   map: Tile[][];
   player: Vector2;
+  vision: Vision[];
+  visionRange: VisionRange;
 };
 
-export default Model
+export default Model;
