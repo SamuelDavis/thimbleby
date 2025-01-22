@@ -16,10 +16,22 @@ export default function Update(model: Model, message: Message): Model {
       model.player = model.player.add(message.payload);
       break;
     }
+    case messages.openDoor.type: {
+      const { x, y } = message.payload;
+      model.map[y][x] = Tile.OpenDoor;
+      break;
+    }
     case messages.updatePlayerVision.type: {
-      const fov = new FOV.PreciseShadowcasting(
-        (x, y) => model.map[y]?.[x] !== Tile.Wall,
-      );
+      const fov = new FOV.PreciseShadowcasting((x, y) => {
+        const tile = model.map[y]?.[x];
+        switch (tile) {
+          case Tile.Floor:
+          case Tile.OpenDoor:
+            return true;
+          default:
+            return false;
+        }
+      });
       model.vision = [];
       fov.compute(
         model.player.x,

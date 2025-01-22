@@ -44,9 +44,14 @@ function resolve(model: Model, message: Message): Message {
     case messages.move.type: {
       const next = model.player.add(message.payload);
       const tile = model.map[next.y]?.[next.x];
-      return tile === Tile.Wall
-        ? messages.noop()
-        : messages.setPlayerPosition(next);
+      switch (tile) {
+        case Tile.Wall:
+          return messages.noop();
+        case Tile.ClosedDoor:
+          return messages.openDoor(next);
+        default:
+          return messages.setPlayerPosition(next);
+      }
     }
   }
   return message;
@@ -55,6 +60,7 @@ function resolve(model: Model, message: Message): Message {
 function effects(_model: Model, message: Message): void {
   switch (message.type) {
     case messages.setPlayerVisionRange.type:
+    case messages.openDoor.type:
     case messages.setPlayerPosition.type: {
       State.dispatch(messages.updatePlayerVision());
       break;

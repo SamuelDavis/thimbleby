@@ -7,6 +7,7 @@ interface Messages {
   move: Vector2;
   updatePlayerVision: void;
   setPlayerVisionRange: VisionRange;
+  openDoor: Vector2;
 }
 
 export type Message = {

@@ -7,7 +7,8 @@ export const maxVisionRange = 20;
 export enum Tile {
   Floor,
   Wall,
-  Door,
+  ClosedDoor,
+  OpenDoor,
 }
 
 type Middleware<Input, Output = Input> = (

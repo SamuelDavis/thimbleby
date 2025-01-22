@@ -1,15 +1,16 @@
 import { Display, Map, RNG } from "rot-js";
 import { Room } from "rot-js/lib/map/features";
-import { createEffect, JSX, onCleanup, onMount } from "solid-js";
+import { createEffect, onCleanup, onMount } from "solid-js";
 import type Model from "./Model";
-import { Message, messages } from "./Message";
+import { messages } from "./Message";
 import { Color, Tile, Vector2 } from "./types";
 import State from "./State";
 
 const TileToGlyphMap: Record<Tile, string> = {
   [Tile.Floor]: ".",
   [Tile.Wall]: "#",
-  [Tile.Door]: "n",
+  [Tile.ClosedDoor]: "n",
+  [Tile.OpenDoor]: "u",
 };
 
 export default function View() {
@@ -27,7 +28,7 @@ export default function View() {
     map[y][x] = v;
   });
   for (const room of digger.getRooms())
-    room.getDoors((x, y) => (map[y][x] = Tile.Door));
+    room.getDoors((x, y) => (map[y][x] = Tile.ClosedDoor));
   State.dispatch(messages.setMap(map));
 
   const room = RNG.getItem(digger.getRooms());
